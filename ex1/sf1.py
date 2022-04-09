@@ -83,3 +83,13 @@ plt.ylabel("Jeans mass [kg]")
 plt.legend()
 plt.savefig("plots/rho_jeans_m.png",dpi=400,bbox_inches="tight")
 plt.show()
+
+"""
+3. Describe your findings.
+"""
+"""
+4. Now consider that the gas behaviour changes at a critical volume density, ρCRIT =
+10−13 g/cm 3 . Above this density the adiabatic index is 7/5. Continue your plot to
+densities above 10−13 g/cm3 and describe the behaviour of the Jeans mass at these
+high densities.
+"""
