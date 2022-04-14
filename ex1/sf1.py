@@ -25,11 +25,11 @@ Cloud 2: Neutral Hydrogen, T=100K and density 1e-23 g/cm^3
 1: What is the Jeans Radius and the corresponding Jeans mass for each cloud?
 """
 T_1=20
-mu_1=2.38*const.u
+mu_1=2.38
 rho_1=1e-15 #kg/m^3
 
 T_2=100
-mu_2=1.4*const.u
+mu_2=1.4
 rho_2=1e-20 #kg/m^3
 
 #Critical density of 1e-13 g/cm^3
@@ -40,7 +40,7 @@ rho_crit=1e-10 #g/cm^3
 #Function to calculate the Isothermal sound speed from the temperature and mean molecular weight.
 #Physical constants taken from astropy.constants package in SI units. Returns sound speed in m/s.
 def sound_speed(T,mu):
-    y=np.sqrt(const.k_B*T/mu*const.m_p)
+    y=np.sqrt(const.k_B*T/(mu*const.m_p))
     return y
 
 #Function to calculate the jeans radius and the jeans mass.
