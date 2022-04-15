@@ -16,8 +16,14 @@ float n2=n;
 float mass=1; //mass of all the particles is the same and set to 1.
 float eta=2;  //eta for smoothing length. Is of order unity and between 2 and 10.
 
-//Function to print the values of a vector
+//Function to print the values of a vector of floats
 void printVec(vector<float> vec){
+    for (int i = 0; i < vec.size(); i++){
+        cout << vec.at(i) << "\n";
+    }
+}
+//Function to print the values of a vector of integers
+void printVecInt(vector<int> vec){
     for (int i = 0; i < vec.size(); i++){
         cout << vec.at(i) << "\n";
     }
@@ -48,10 +54,16 @@ float SmoothLength(float eta,vector<float> vec){
     return h;
 }
 
-//Function to find the positions of neighbours of particel at i. Return positions as a vector.
-vector<float> neighbours(int pos, float h){
-    vector<float> neighbours(0,0);
-    return neighbours;
+//Function to find the positions of neighbours of particle at i. Return positions as a vector.
+vector<int> neighbours(int pos, vector<float> vec, float h){
+    vector<int> newvec;
+    for (int i=0; i < vec.size(); i++){
+        if (abs(vec.at(i)-vec.at(pos)) <= 2*h){
+            newvec.push_back(i);
+        }
+    }
+    //printVec(newvec);
+    return newvec;
 }
 //Function to evaluate the M4 spline kernel for a given smoothing length and neigbour distance
 float M4kernel(float pos1,float pos2,float h){
@@ -89,6 +101,9 @@ int main () {
     vector<float> positions(n+1,0);  //vector of size n+1, as last element will need to be removed. each element is 0.
     //printVec(positions);
     vector<float> newpos=setPositions(positions);
-    cout <<"smoothing length -> " << SmoothLength(eta,newpos) << "\n";
+    float h=SmoothLength(eta,newpos);
+    cout <<"smoothing length -> " << h << "\n";
+    vector<int> test=neighbours(2,newpos,h);
+    printVecInt(test);
 
 }
