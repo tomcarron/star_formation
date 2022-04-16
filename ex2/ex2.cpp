@@ -1,20 +1,21 @@
 #include<iostream>
 #include <vector>
-using namespace std;
-
+#include <fstream>
 #include <iomanip>
 #include <cmath>
+#include <string>
 using std::abs;
 using std::pow;
 using std::setw;
 using std::vector;
+using namespace std;
 
 /* Code for exercise 2 of tcsf, basic functions for Smoothed Particles Hydrodynamics (SPH) */
 
-int n=100;  //number of particles in system
+int n=20;  //number of particles in system
 float n2=n;
 float mass=1.0; //mass of all the particles is the same and set to 1.
-float eta=2.0;  //eta for smoothing length. Is of order unity and between 2 and 10.
+float eta=2.1;  //eta for smoothing length. Is of order unity and between 2 and 10.
 
 //Function to print the values of a vector of floats
 void printVec(vector<float> vec){
@@ -27,6 +28,20 @@ void printVecInt(vector<int> vec){
     for (int i = 0; i < vec.size(); i++){
         cout << vec.at(i) << "\n";
     }
+}
+// Function to take a vector of floats and save to a txt file named "name.txt" for plotting in python.
+void output(vector<float> vec, char name[]){
+    fstream file;
+    file.open(name,ios_base::out);
+
+    for(int i=0;i<vec.size();i++)
+    {
+        file<<vec.at(i)<<endl;
+    }
+
+    file.close();
+
+
 }
 //Now write a function to edit the values of the vector to be evenly spaced between 0 and n but not exactly at n.
 vector<float> setPositions(vector<float> vec){
@@ -60,7 +75,7 @@ float SmoothLength(float eta,vector<float> vec){
 vector<int> neighbours(int pos, vector<float> vec, float h){
     vector<int> newvec;
     for (int i=0; i < vec.size(); i++){
-        if (abs(vec.at(i)-vec.at(pos)) <= 2*h){
+        if ((abs(vec.at(pos)-vec.at(i)) < 2.0*h )){ //& (i != pos)
             newvec.push_back(i);
         }
     }
@@ -70,13 +85,13 @@ vector<int> neighbours(int pos, vector<float> vec, float h){
 //Function to evaluate the M4 spline kernel for a given smoothing length and neigbour distance
 float M4kernel(float pos1,float pos2,float h){
     float norm=(2.0/(3.0*h));
-    float s=abs(pos1-pos2) / h;
+    float s=(abs(pos1-pos2) / h);
     float w=0.0;
    // cout << "s= " << s << "\n";
-    if (s>=0.0 && s<1.0){
-        w=norm*(1.0-((3.0/2.0)*(pow(s,2.0)))+((3.0/4.0)*(pow(s,3.0))));
-    }else if (s>=1.0 && s<=2.0){
-        w=norm*((1.0/4.0)*(pow((2-s),3.0)));
+    if (s>=0.0 && s<=1.0){
+        w=(norm*(1.0-((3.0/2.0)*(pow(s,2.0)))+((3.0/4.0)*(pow(s,3.0)))));
+    }else if (s>1.0 && s<=2.0){
+        w=(norm*((1.0/4.0)*(pow((2-s),3.0))));
     }else if (s>2.0){
         w=0.0;
     }else {
@@ -85,8 +100,6 @@ float M4kernel(float pos1,float pos2,float h){
     //cout << "w= " << w << "\n";
     //cout << "norm= " << norm << "\n";
     return w;
-
-
 }
 
 //Now a function to find the neighbours of each particle using a brute force approach.
@@ -101,14 +114,15 @@ vector<float> density(float mass,float h, vector<float> vec){
         //cout << i;
         float temp=0.0;
         //cout << temp << "=temp\n";
-        for (int j = 0; j < nn.size(); j++){
+        for (int j =0; j < nn.size(); j++){
             //cout << "i= " << i <<"j= " << j << "\n";
-            float w = (mass*(M4kernel(vec.at(i),vec.at(nn.at(j)),h)));
-            //cout << "M4kernel= " << (M4kernel(vec.at(i),vec.at(nn.at(j)),h)) << "\n";
-            //cout << "vec.at(i)= " << vec.at(i) << " vec.at(nn.at(j))= " << vec.at(nn.at(j)) << "\n";
-            //cout << "w= " << w << "\n";
-            temp += w;
-            //cout << temp << w << "temp, w\n";
+                cout << "i -> " << i << "j -> " << (nn.at(j)) << "\n";
+                float w = (mass*(M4kernel(vec.at(i),vec.at(nn.at(j)),h)));
+                //cout << "M4kernel= " << (M4kernel(vec.at(i),vec.at(nn.at(j)),h)) << "\n";
+                //cout << "vec.at(i)= " << vec.at(i) << " vec.at(nn.at(j))= " << vec.at(nn.at(j)) << "\n";
+                //cout << "w= " << w << "\n";
+                temp =temp + w;
+                //cout << temp << w << "temp, w\n";
         }
         density.push_back(temp);
 
@@ -130,6 +144,10 @@ int main () {
     //printVecInt(test);
     vector<float> densities=density(mass,h,newpos);
     printVec(densities);
-    //cout << densities.size() << "densities size\n";
+    cout << densities.size() << " <- densities size\n";
+    //vector<int> nn=neighbours(12,newpos,h);
+    //printVecInt(nn);
+    char filename[]="densities.txt";
+    output(densities,filename);
 
 }
