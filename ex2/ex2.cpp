@@ -11,10 +11,10 @@ using std::vector;
 
 /* Code for exercise 2 of tcsf, basic functions for Smoothed Particles Hydrodynamics (SPH) */
 
-int n=1000;  //number of particles in system
+int n=100;  //number of particles in system
 float n2=n;
-float mass=1; //mass of all the particles is the same and set to 1.
-float eta=3;  //eta for smoothing length. Is of order unity and between 2 and 10.
+float mass=1.0; //mass of all the particles is the same and set to 1.
+float eta=2.0;  //eta for smoothing length. Is of order unity and between 2 and 10.
 
 //Function to print the values of a vector of floats
 void printVec(vector<float> vec){
@@ -69,23 +69,21 @@ vector<int> neighbours(int pos, vector<float> vec, float h){
 }
 //Function to evaluate the M4 spline kernel for a given smoothing length and neigbour distance
 float M4kernel(float pos1,float pos2,float h){
-    float norm=2.0/(3.0*h);
+    float norm=(2.0/(3.0*h));
     float s=abs(pos1-pos2) / h;
-    float w;
+    float w=0.0;
+   // cout << "s= " << s << "\n";
     if (s>=0.0 && s<1.0){
-        float w=norm*(1.0-((3.0/2.0)*(pow(s,2.0)))+((3.0/4.0)*(pow(s,3.0))));
-    }
-    else if (s>=1.0 && s<=2.0){
-        float w=norm*((1.0/4.0)*(pow((2.0-s),3.0)));
-    }
-    else if (s>2.0){
-        float w=0.0;
-    }
-    else {
+        w=norm*(1.0-((3.0/2.0)*(pow(s,2.0)))+((3.0/4.0)*(pow(s,3.0))));
+    }else if (s>=1.0 && s<=2.0){
+        w=norm*((1.0/4.0)*(pow((2-s),3.0)));
+    }else if (s>2.0){
+        w=0.0;
+    }else {
         cout << "error in kernel evaluation bozo";
     }
-   // cout << "s= " << s << "\n";
-   // cout << "w= " << w << "\n";
+    //cout << "w= " << w << "\n";
+    //cout << "norm= " << norm << "\n";
     return w;
 
 
@@ -96,12 +94,12 @@ float M4kernel(float pos1,float pos2,float h){
 //then we calculate the density at each position and return it as a vector.
 
 vector<float> density(float mass,float h, vector<float> vec){
-    vector<float> density(0,0);
+    vector<float> density;
     for ( int i = 0; i < (vec.size()); i++ ){
         vector<int> nn=neighbours(i,vec,h);     //creating a vector of the nearest neighbours of particle i.
         //printVecInt(nn);
         //cout << i;
-        float temp = 0;
+        float temp=0.0;
         //cout << temp << "=temp\n";
         for (int j = 0; j < nn.size(); j++){
             //cout << "i= " << i <<"j= " << j << "\n";
@@ -110,23 +108,28 @@ vector<float> density(float mass,float h, vector<float> vec){
             //cout << "vec.at(i)= " << vec.at(i) << " vec.at(nn.at(j))= " << vec.at(nn.at(j)) << "\n";
             //cout << "w= " << w << "\n";
             temp += w;
+            //cout << temp << w << "temp, w\n";
         }
         density.push_back(temp);
+
     }
     return density;
 }
 
 
 int main () {
-    vector<float> positions(n,1);  //vector of size n+2, as last two elements will need to be removed. each element is 0.
+    vector<float> positions(n,0);  //vector of size n+2, as last two elements will need to be removed. each element is 0.
     //printVec(positions);
+    //cout << positions.size() << "positions size\n";
     vector<float> newpos=setPositions(positions);
+    //cout << newpos.size() << "newpos size\n";
     //printVec(newpos);
     float h=SmoothLength(eta,newpos);
-    //cout <<"smoothing length -> " << h << "\n";
+    cout <<"smoothing length -> " << h << "\n";
     //vector<int> test=neighbours(2,newpos,h);
     //printVecInt(test);
     vector<float> densities=density(mass,h,newpos);
-   // printVec(densities);
+    printVec(densities);
+    //cout << densities.size() << "densities size\n";
 
 }
