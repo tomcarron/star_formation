@@ -11,7 +11,7 @@ using std::vector;
 
 /* Code for exercise 2 of tcsf, basic functions for Smoothed Particles Hydrodynamics (SPH) */
 
-int n=20;  //number of particles in system
+int n=1000;  //number of particles in system
 float n2=n;
 float mass=1; //mass of all the particles is the same and set to 1.
 float eta=3;  //eta for smoothing length. Is of order unity and between 2 and 10.
@@ -30,12 +30,14 @@ void printVecInt(vector<int> vec){
 }
 //Now write a function to edit the values of the vector to be evenly spaced between 0 and n but not exactly at n.
 vector<float> setPositions(vector<float> vec){
+    //cout << "vecsize= " << vec.size() <<"\n";
     for ( int i = 0; i < vec.size(); i++ ) {
         float i2=i;
-        vec.at(i) = (i2 / vec.size())+0.1; // set element at location i to i /n
+        vec.at(i) = ((i2 / (vec.size()+1.0))+(1.0/(vec.size()+1.0))); // set element at location i to i /n
     }
-    vec.pop_back();  //removes back value
-    printVec(vec);
+   // vec.pop_back();  //removes back value
+    //vec.pop_back();  //removes back value
+    //printVec(vec);
     return vec;
 }
 //Function to calculate the smoothing length
@@ -100,13 +102,13 @@ vector<float> density(float mass,float h, vector<float> vec){
         //printVecInt(nn);
         //cout << i;
         float temp = 0;
-        cout << temp << "=temp\n";
+        //cout << temp << "=temp\n";
         for (int j = 0; j < nn.size(); j++){
-            cout << "i= " << i <<"j= " << j << "\n";
+            //cout << "i= " << i <<"j= " << j << "\n";
             float w = (mass*(M4kernel(vec.at(i),vec.at(nn.at(j)),h)));
-            cout << "M4kernel= " << (M4kernel(vec.at(i),vec.at(nn.at(j)),h)) << "\n";
-            cout << "vec.at(i)= " << vec.at(i) << " vec.at(nn.at(j))= " << vec.at(nn.at(j)) << "\n";
-            cout << "w= " << w << "\n";
+            //cout << "M4kernel= " << (M4kernel(vec.at(i),vec.at(nn.at(j)),h)) << "\n";
+            //cout << "vec.at(i)= " << vec.at(i) << " vec.at(nn.at(j))= " << vec.at(nn.at(j)) << "\n";
+            //cout << "w= " << w << "\n";
             temp += w;
         }
         density.push_back(temp);
@@ -116,14 +118,15 @@ vector<float> density(float mass,float h, vector<float> vec){
 
 
 int main () {
-    vector<float> positions(n+1,0);  //vector of size n+1, as last element will need to be removed. each element is 0.
+    vector<float> positions(n,1);  //vector of size n+2, as last two elements will need to be removed. each element is 0.
     //printVec(positions);
     vector<float> newpos=setPositions(positions);
+    //printVec(newpos);
     float h=SmoothLength(eta,newpos);
     //cout <<"smoothing length -> " << h << "\n";
     //vector<int> test=neighbours(2,newpos,h);
     //printVecInt(test);
     vector<float> densities=density(mass,h,newpos);
-    printVec(densities);
+   // printVec(densities);
 
 }
