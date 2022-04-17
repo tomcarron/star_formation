@@ -12,8 +12,8 @@ using namespace std;
 
 /* Code for exercise 2 of tcsf, basic functions for Smoothed Particles Hydrodynamics (SPH) */
 
-int n=20;  //number of particles in system
-float n2=n;
+int n=100;  //number of particles in system
+//float n2=n;
 float mass=1.0; //mass of all the particles is the same and set to 1.
 float eta=2.1;  //eta for smoothing length. Is of order unity and between 2 and 10.
 
@@ -48,7 +48,7 @@ vector<float> setPositions(vector<float> vec){
     //cout << "vecsize= " << vec.size() <<"\n";
     for ( int i = 0; i < vec.size(); i++ ) {
         float i2=i;
-        vec.at(i) = ((i2 / (vec.size()+1.0))+(1.0/(vec.size()+1.0))); // set element at location i to i /n
+        vec.at(i) = ((i2 / (vec.size()))+(1.0/(vec.size()))); // set element at location i to i /n
     }
    // vec.pop_back();  //removes back value
     //vec.pop_back();  //removes back value
@@ -57,7 +57,7 @@ vector<float> setPositions(vector<float> vec){
 }
 //Function to calculate the smoothing length
 float SmoothLength(float eta,vector<float> vec){
-    float sum = 0;  //dummy value to sum all the distances to nearest neighbour
+    float sum=0.0;  //dummy value to sum all the distances to nearest neighbour
     for (int i = 0; i < (vec.size()-1); i++){
         float dist=vec.at(i+1)-vec.at(i);   //distance between i and i+1 positions
         sum=sum+dist;                          //summing distances
@@ -87,14 +87,26 @@ float M4kernel(float pos1,float pos2,float h){
     float norm=(2.0/(3.0*h));
     float s=(abs(pos1-pos2) / h);
     float w=0.0;
-   // cout << "s= " << s << "\n";
+    //cout << "pos1,pos2= " << pos1 << " " << pos2 << "\n";
+    //cout << "s= " << s << "\n";
+    //cout << "s^2= " << pow(s,2.0) << "\n";
+    //cout << "(2-s)^3= " << pow((2-s),3.0) << "\n";
     if (s>=0.0 && s<=1.0){
         w=(norm*(1.0-((3.0/2.0)*(pow(s,2.0)))+((3.0/4.0)*(pow(s,3.0)))));
-    }else if (s>1.0 && s<=2.0){
+        //cout << "s= " << s << "\n";
+        //cout << "w= " << w << "\n";
+    }
+    else if (s>1.0 && s<=2.0){
         w=(norm*((1.0/4.0)*(pow((2-s),3.0))));
-    }else if (s>2.0){
+        //cout << "s= " << s << "\n";
+        //cout << "w= " << w << "\n";
+    }
+    else if (s>2.0){
         w=0.0;
-    }else {
+        //cout << "s= " << s << "\n";
+        //cout << "w= " << w << "\n";
+    }
+    else {
         cout << "error in kernel evaluation bozo";
     }
     //cout << "w= " << w << "\n";
@@ -115,8 +127,8 @@ vector<float> density(float mass,float h, vector<float> vec){
         float temp=0.0;
         //cout << temp << "=temp\n";
         for (int j =0; j < nn.size(); j++){
-            //cout << "i= " << i <<"j= " << j << "\n";
-                cout << "i -> " << i << "j -> " << (nn.at(j)) << "\n";
+                //cout << "i= " << i <<"j= " << j << "\n";
+                //cout << "i -> " << i << "j -> " << (nn.at(j)) << "\n";
                 float w = (mass*(M4kernel(vec.at(i),vec.at(nn.at(j)),h)));
                 //cout << "M4kernel= " << (M4kernel(vec.at(i),vec.at(nn.at(j)),h)) << "\n";
                 //cout << "vec.at(i)= " << vec.at(i) << " vec.at(nn.at(j))= " << vec.at(nn.at(j)) << "\n";
@@ -132,12 +144,12 @@ vector<float> density(float mass,float h, vector<float> vec){
 
 
 int main () {
-    vector<float> positions(n,0);  //vector of size n+2, as last two elements will need to be removed. each element is 0.
+    vector<float> positions(n,0);  //vector of size n, each element is 0.
     //printVec(positions);
     //cout << positions.size() << "positions size\n";
     vector<float> newpos=setPositions(positions);
     //cout << newpos.size() << "newpos size\n";
-    //printVec(newpos);
+    printVec(newpos);
     float h=SmoothLength(eta,newpos);
     cout <<"smoothing length -> " << h << "\n";
     //vector<int> test=neighbours(2,newpos,h);
@@ -149,5 +161,7 @@ int main () {
     //printVecInt(nn);
     char filename[]="densities.txt";
     output(densities,filename);
+    char file2[]="positions.txt";
+    output(newpos,file2);
 
 }
