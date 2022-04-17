@@ -15,7 +15,7 @@ using namespace std;
 int n=100;  //number of particles in system
 //float n2=n;
 float mass=1.0; //mass of all the particles is the same and set to 1.
-float eta=2.1;  //eta for smoothing length. Is of order unity and between 2 and 10.
+float eta=8;  //eta for smoothing length. Is of order unity and between 2 and 10.
 
 //Function to print the values of a vector of floats
 void printVec(vector<float> vec){
