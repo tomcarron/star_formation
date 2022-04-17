@@ -48,7 +48,7 @@ vector<float> setPositions(vector<float> vec){
     //cout << "vecsize= " << vec.size() <<"\n";
     for ( int i = 0; i < vec.size(); i++ ) {
         float i2=i;
-        vec.at(i) = ((i2 / (vec.size()))+(1.0/(vec.size()))); // set element at location i to i /n
+        vec.at(i) = ((i2 / (vec.size()))+(1.0/(vec.size()+1))); // set element at location i to i /n
     }
    // vec.pop_back();  //removes back value
     //vec.pop_back();  //removes back value
