@@ -115,11 +115,13 @@ def lambda_max(lambda_i, lambda_mi):
 
 # function to determine the next timestep input lambda l, with the CFL condition: C = 0.001; l = lambda * dt/dx
 def getTimestep(l, dx):
-    max_step=0.001
+    max_step=0.01
     C = 0.5
     cfl=(dx * C / l)
-    if cfl < max_step:
-        dt=cfl
+    cfl2=C/l
+    temp=np.amin([abs(cfl),abs(cfl2)])
+    if temp < max_step:
+        dt=temp
     else:
         dt=max_step
     return dt
