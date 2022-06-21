@@ -57,8 +57,8 @@ def max_eigenvalue(w, gamma=1.4):
         )  # v_x + sqrt(gamma * pressure / density)
     else:
         lambda_1 = w[1]  # v_x
-        lambda_2=0
-        lambda_3=0
+        lambda_2 = w[1]  # v_x
+        lambda_3 = w[1]  # v_x
 
 
     lambda_max = np.max([np.abs(lambda_1), np.abs(lambda_2), np.abs(lambda_3)])
@@ -86,7 +86,7 @@ def invert_q(q, gamma):
         f[1] = q[1] / q[0]
         f[2] = q[2] / q[0]
         f[3] = q[3] / q[0]
-        f[4] = (gamma - 1) * (q[4] - 1 / 2 * q[0] * (f[1] ** 2 + f[2] ** 2 + f[3] ** 2))
+        f[4] = (gamma - 1) * (q[4] - 0.5 * q[0] * (f[1] ** 2 + f[2] ** 2 + f[3] ** 2))
     else:
         for i in range(5):
             f[i]=0
@@ -104,7 +104,7 @@ def fx(w, gamma):
     fx[1] = fx[0] * w[1] + w[4]
     fx[2] = fx[1] * w[2]
     fx[3] = fx[1] * w[3]
-    fx[4] = w[1] * (0.5 * rho * np.abs(v) + gamma * w[4] / (gamma - 1))
+    fx[4] = w[1] * (0.5 * rho * np.abs(v) + (gamma * w[4]) / (gamma - 1))
     return fx
 
 
@@ -115,8 +115,14 @@ def lambda_max(lambda_i, lambda_mi):
 
 # function to determine the next timestep input lambda l, with the CFL condition: C = 0.001; l = lambda * dt/dx
 def getTimestep(l, dx):
-    C = 0.001 
-    return dx * C / l
+    max_step=0.001
+    C = 0.5
+    cfl=(dx * C / l)
+    if cfl < max_step:
+        dt=cfl
+    else:
+        dt=max_step
+    return dt
 
 
 # function to calculate the f_array
@@ -190,7 +196,7 @@ def run(N, a, b, shock_loc, gamma, w_1, w_2, tmax):
         l = []
         for i in range(len(q)):
             l = np.append(l, max_eigenvalue(invert_q(q[i],gamma), gamma))
-            dt = getTimestep(np.max(l), gamma)
+            dt = getTimestep(np.max(l), d_x)
         # calculate the RiemannFlux
         finterface = getRiemannFlux(q, gamma)
         # update the q'
