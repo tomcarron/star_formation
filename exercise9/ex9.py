@@ -28,7 +28,7 @@ def initial(a, b, N, q_1, q_2, shock_loc):
 
 # Delta x, Domain a,b. N particles.
 def dx(a, b, N):
-    dx = (b - a) / N
+    dx = (b - a) / (N)
     return dx
 
 
@@ -79,6 +79,17 @@ def q_function(w, gamma):
 
 
 # to get w from q
+
+def invert_q(q, gamma):
+    f = np.zeros(5)
+    f[0] = q[0]
+    f[1] = q[1] / q[0]
+    f[2] = q[2] / q[0]
+    f[3] = q[3] / q[0]
+    f[4] = (gamma - 1) * (q[4] - 0.5 * q[0] * (f[1] ** 2 + f[2] ** 2 + f[3] ** 2))
+    
+    return f
+"""
 def invert_q(q, gamma):
     f = np.zeros(5)
     if q[0] != 0:
@@ -92,7 +103,7 @@ def invert_q(q, gamma):
             f[i]=0
     
     return f
-
+    """
 #To calculate f_x array from primitive variables
 def fx(w, gamma):
     rho = w[0]
@@ -102,9 +113,10 @@ def fx(w, gamma):
     fx = np.zeros(5)
     fx[0] = rho * w[1]
     fx[1] = fx[0] * w[1] + w[4]
-    fx[2] = fx[1] * w[2]
-    fx[3] = fx[1] * w[3]
+    fx[2] = fx[0] * w[2]
+    fx[3] = fx[0] * w[3]
     fx[4] = w[1] * (0.5 * rho * np.abs(v) + (gamma * w[4]) / (gamma - 1))
+    #print("fx",fx)
     return fx
 
 
@@ -115,7 +127,7 @@ def lambda_max(lambda_i, lambda_mi):
 
 # function to determine the next timestep input lambda l, with the CFL condition: C = 0.001; l = lambda * dt/dx
 def getTimestep(l, dx):
-    max_step=0.01
+    max_step=0.001
     C = 0.5
     cfl=(dx * C / l)
     cfl2=C/l
@@ -131,6 +143,9 @@ def getTimestep(l, dx):
 def getRiemannFlux(q_array, gamma):
     f = np.zeros((len(q_array), 5))
     for i in range(len(q_array)):
+        #print("i RF",i)
+        #print("q",q_array)
+        #print("invert_q",invert_q(q_array[i], gamma))
         f[i] = fx(invert_q(q_array[i], gamma), gamma)
     return f
 
@@ -139,19 +154,28 @@ def getRiemannFlux(q_array, gamma):
 def update(q_array, finterface, dt, dx, l):
     # boundary condition
     new_q_array = np.zeros_like(q_array)
-    for j in range(len(q_array)-1):
+    #print(len(q_array))
+    for j in range(len(q_array)):
         if j == 0:
-            i = j + 1
+            i = j 
+            k = j+1
         elif j == len(q_array)-1:
-            i = j - 1
+            i = j -1
+            k = j 
         else:
-            i = j
+            i = j-1
+            k=j+1
+        #print(i,j,k)
         temp1 = approx_Riemann_solver(
-            finterface[i + 1], finterface[i], q_array[i + 1], q_array[i], l[i + 1], l[i]
+            finterface[k], finterface[j], q_array[k], q_array[j], l[k], l[j]
         )
         temp2 = approx_Riemann_solver(
-            finterface[i], finterface[i - 1], q_array[i], q_array[i - 1], l[i], l[i - 1]
+            finterface[j], finterface[i], q_array[j], q_array[i], l[j], l[i]
         )
+        #print("temp1",temp1)
+        #print("temp2",temp2)
+        #print("(dt / dx * (temp1 - temp2))",(dt / dx * (temp1 - temp2)))
+        #print("q_array[j]",q_array[j])
         new_q_array[j] = q_array[j] - (dt / dx * (temp1 - temp2))
     return new_q_array
 
@@ -163,6 +187,10 @@ def approx_Riemann_solver(fx_i, fx_im, q_i, q_im, l_i, l_im):
     l_max = lambda_max(l_i, l_im)
     for i in range(5):
         temp[i] = 0.5 * (fx_im[i] + fx_i[i]) - 0.5 * l_max * (q_i[i] - q_im[i])
+    #temp[np.isnan(temp)]=np.zeros(5)[np.isnan(temp)]
+    #print("temp",temp)
+    #print("fx_im[i],fx_i[i],l_max,q_i[i],q_im[i]")
+    #print(fx_im[i],fx_i[i],l_max,q_i[i],q_im[i])
     return temp
 
 def convert_var(array_prim_var, gamma=1.4):
@@ -198,12 +226,12 @@ def run(N, a, b, shock_loc, gamma, w_1, w_2, tmax):
         l = []
         for i in range(len(q)):
             l = np.append(l, max_eigenvalue(invert_q(q[i],gamma), gamma))
-            dt = getTimestep(np.max(l), d_x)
+        dt = getTimestep(np.max(l), d_x)
         # calculate the RiemannFlux
         finterface = getRiemannFlux(q, gamma)
         # update the q'
         q_new = update(q, finterface, dt, d_x, l)
         q = q_new
         t += dt
-        # print(dt)
+        #print(dt)
     return q
